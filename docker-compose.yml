@@ -1,0 +1,78 @@
+version: "3.9"
+services:
+    nginx:
+        container_name: nginx
+        build:
+            context: .
+            dockerfile: ./docker/development/nginx/Dockerfile
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/app
+        depends_on:
+            - php-fpm
+
+    php-fpm:
+        container_name: php-fpm
+        build:
+            context: .
+            dockerfile: ./docker/development/php-fpm/Dockerfile
+        user: "${USER_ID}:${GROUP_ID}"
+        environment:
+            YII_ENV: dev
+            YII_DEBUG: 1
+            DB_HOST: mysql
+            DB_DATABASE: yii2-test-task
+            DB_USERNAME: yii2-test-task
+            DB_PASSWORD: v4ubZUs94e6P
+            SMSPILOT_API_KEY: XXXXXXXXXXXXYYYYYYYYYYYYZZZZZZZZXXXXXXXXXXXXYYYYYYYYYYYYZZZZZZZZ
+        volumes:
+            - ./:/app
+
+    php-cli:
+        container_name: php-cli
+        build:
+            context: .
+            dockerfile: ./docker/development/php-cli/Dockerfile
+        user: "${USER_ID}:${GROUP_ID}"
+        environment:
+            YII_ENV: dev
+            YII_DEBUG: 1
+            DB_HOST: mysql
+            DB_DATABASE: yii2-test-task
+            DB_USERNAME: yii2-test-task
+            DB_PASSWORD: v4ubZUs94e6P
+            SMSPILOT_API_KEY: XXXXXXXXXXXXYYYYYYYYYYYYZZZZZZZZXXXXXXXXXXXXYYYYYYYYYYYYZZZZZZZZ
+        volumes:
+            - ./:/app
+
+    mysql:
+        image: mysql:8.0
+        container_name: mysql
+        volumes:
+            - mysql-data:/var/lib/mysql
+        environment:
+            MYSQL_RANDOM_ROOT_PASSWORD: yes
+            MYSQL_USER: yii2-test-task
+            MYSQL_PASSWORD: v4ubZUs94e6P
+            MYSQL_DATABASE: yii2-test-task
+
+    phpmyadmin:
+        image: phpmyadmin:5.2
+        container_name: phpmyadmin
+        ports:
+            - "8083:80"
+        environment:
+            PMA_HOST: mysql
+        depends_on:
+            - mysql
+        volumes:
+            - ./docker/development/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+
+networks:
+    default:
+        name: yii2-test-task-network
+        driver: bridge
+
+volumes:
+    mysql-data:
